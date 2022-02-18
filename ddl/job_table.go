@@ -238,7 +238,6 @@ func (d *ddl) startDispatchLoop() {
 		case <-d.ddlJobCh:
 			sleep := false
 			for !sleep {
-				log.Warn("wwz before getSomeGeneralJob", zap.String("time", time.Now().String()))
 				jobs, err := d.getSomeGeneralJob(sess)
 				if err != nil {
 					log.Warn("err", zap.Error(err))
@@ -265,7 +264,6 @@ func (d *ddl) startDispatchLoop() {
 				}
 			}
 		case <-ticker.C:
-			//log.Info("wwz tickerddl")
 			sleep := false
 			for !sleep {
 				jobs, err := d.getSomeGeneralJob(sess)
@@ -310,7 +308,6 @@ func (d *ddl) startDispatchLoop() {
 				}
 			}
 		case _, ok = <-notifyDDLJobByEtcdChGeneral:
-			log.Info("wwz notifyDDLJobByEtcdChReorg")
 			if !ok {
 				panic("notifyDDLJobByEtcdChGeneral in trouble")
 			}
@@ -372,7 +369,7 @@ func (d *ddl) addDDLJobs(job []*model.Job) error {
 		}
 		sql += fmt.Sprintf("(%d, %t, %d, %d, 0x%x, %d, %t)", job.ID, mayNeedReorg(job), job.SchemaID, job.TableID, b, 0, job.Type == model.ActionDropSchema)
 	}
-	//log.Warn("add ddl job to table", zap.String("sql", sql))
+	log.Warn("add ddl job to table", zap.String("sql", sql))
 	//ts := time.Now()
 	sess, err := d.sessPool.get()
 	if err != nil {
