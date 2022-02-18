@@ -766,7 +766,7 @@ func (w *worker) handleDDLJobQueue(d *ddlCtx) error {
 		cancel()
 
 		if RunInGoTest {
-			// d.Mu.hook is initialed from domain / test callback, which will force the owner host update schema diff synchronously.
+			// d.mu.hook is initialed from domain / test callback, which will force the owner host update schema diff synchronously.
 			d.mu.RLock()
 			d.mu.hook.OnSchemaStateChanged()
 			d.mu.RUnlock()
