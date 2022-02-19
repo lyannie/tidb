@@ -415,7 +415,7 @@ func (d *ddl) Start(ctxPool *pools.ResourcePool) error {
 				return wk, nil
 			}
 			d.wp = newDDLWorkerPool(pools.NewResourcePool(sysFac, 10, 10, 3*time.Minute))
-			d.gwp = newDDLWorkerPool(pools.NewResourcePool(sysFac2, 300, 300, 0))
+			d.gwp = newDDLWorkerPool(pools.NewResourcePool(sysFac2, 150, 150, 0))
 			d.sessForAddDDL, _ = d.sessPool.get()
 			d.wg.Run(d.startDispatchLoop)
 		} else {

@@ -793,7 +793,7 @@ func (do *Domain) Init(ddlLease time.Duration, sysExecutorFactory func(*Domain) 
 	sysFac := func() (pools.Resource, error) {
 		return sysExecutorFactory(do)
 	}
-	sysCtxPool := pools.NewResourcePool(sysFac, 200, 200, resourceIdleTimeout)
+	sysCtxPool := pools.NewResourcePool(sysFac, 190, 190, resourceIdleTimeout)
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	do.cancel = cancelFunc
 	var callback ddl.Callback
