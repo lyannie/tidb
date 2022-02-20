@@ -285,17 +285,15 @@ func (d *ddl) addBatchDDLJobs(tasks []*limitJobTask) {
 	startTs := uint64(0)
 	err = kv.RunInNewTxn(context.Background(), d.store, true, func(ctx context.Context, txn kv.Transaction) error {
 		t := meta.NewMeta(txn)
-		ids, err = t.GenGlobalJobID(len(tasks))
+		ids, err = t.GenGlobalIDs(len(tasks))
 		if err != nil {
+			log.Error("GenGlobalJobID", zap.Error(err))
 			return errors.Trace(err)
 		}
 		startTs = txn.StartTS()
 		return nil
 	})
-
-	if err != nil {
-		log.Error("GenGlobalJobID", zap.Error(err))
-	} else {
+	if err == nil {
 		switch len(tasks) {
 		case 0:
 			return
@@ -306,9 +304,7 @@ func (d *ddl) addBatchDDLJobs(tasks []*limitJobTask) {
 			job.ID = ids[0]
 			err = d.addDDLJob(job)
 			if err != nil {
-				if err != nil {
-					log.Error("addDDLJob", zap.Error(err))
-				}
+				log.Error("addDDLJob", zap.Error(err))
 			}
 		default:
 			jobTasks := make([]*model.Job, len(tasks))
@@ -325,7 +321,6 @@ func (d *ddl) addBatchDDLJobs(tasks []*limitJobTask) {
 			}
 		}
 	}
-
 	var jobs string
 	for _, task := range tasks {
 		task.err <- err
@@ -333,7 +328,11 @@ func (d *ddl) addBatchDDLJobs(tasks []*limitJobTask) {
 		metrics.DDLWorkerHistogram.WithLabelValues(metrics.WorkerAddDDLJob, task.job.Type.String(),
 			metrics.RetLabel(err)).Observe(time.Since(startTime).Seconds())
 	}
-	logutil.BgLogger().Info("[ddl] add DDL jobs", zap.Int("batch count", len(tasks)), zap.String("jobs", jobs))
+	if err != nil {
+		logutil.BgLogger().Warn("[ddl] add DDL jobs failed", zap.String("jobs", jobs), zap.Error(err))
+	} else {
+		logutil.BgLogger().Info("[ddl] add DDL jobs", zap.Int("batch count", len(tasks)), zap.String("jobs", jobs))
+	}
 }
 
 // getHistoryDDLJob gets a DDL job with job's ID from history queue.
